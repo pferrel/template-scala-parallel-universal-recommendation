@@ -11,8 +11,7 @@ libraryDependencies ++= Seq(
   "org.xerial.snappy" % "snappy-java" % "1.1.1.7",
   // Mahout's Spark code
   // used in 'pio build' with maven repos
-  "org.apache.mahout" %% "mahout-math-scala" % mahoutVersion
-    exclude("org.apache.mahout", "mahout-spark"),
+  "org.apache.mahout" %% "mahout-math-scala" % mahoutVersion,
   "org.apache.mahout" %% "mahout-spark" % mahoutVersion
     exclude("org.apache.spark", "spark-core_2.10"),
   "org.apache.mahout"  % "mahout-math" % mahoutVersion,
