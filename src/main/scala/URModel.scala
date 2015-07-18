@@ -58,8 +58,7 @@ class URModel(
 
     // Elasticsearch takes a Map with all fields, not a tuple
     logger.info("Grouping all correlators into doc + fields for writing to index")
-    val fields = (correlators :+ properties).filterNot(c => c.isEmpty())
-    val esFields = groupAll(fields)
+    val esFields = groupAll((correlators :+ properties).filterNot(c => c.isEmpty()))
 
     // May specifiy a remapping parameter to put certain fields in different places in the ES document
     // todo: need to write, then hot swap index to live index, prehaps using aliases? To start let's delete index and
@@ -83,7 +82,6 @@ class URModel(
   def groupAll( fields: Seq[RDD[(String, (Map[String, Seq[String]]))]]): RDD[(String, (Map[String, Seq[String]]))] = {
     if (fields.size > 1) {
       fields.head.cogroup[Map[String, Seq[String]]](groupAll(fields.drop(1))).map { case (key, pairMapSeqs) =>
-        // only ever one map per list since they were from dictinct rdds
         if (pairMapSeqs._1.size != 0 && pairMapSeqs._2 != 0)
           (key, pairMapSeqs._1.head ++ pairMapSeqs._2.head)
         else if (pairMapSeqs._1.size == 0 && pairMapSeqs._2 != 0)
