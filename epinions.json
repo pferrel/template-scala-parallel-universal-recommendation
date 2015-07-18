@@ -1,0 +1,33 @@
+{
+  "id": "default",
+  "description": "Epinions settings",
+  "engineFactory": "org.template.RecommendationEngine",
+  "datasource": {
+    "params" : {
+      "name": "sample-epinions-data.txt",
+      "appName": "Epinions",
+      "eventNames": ["rate", "trust"]
+    }
+  },
+  "sparkConf": {
+    "spark.serializer": "org.apache.spark.serializer.KryoSerializer",
+    "spark.kryo.registrator": "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator",
+    "spark.kryo.referenceTracking": "false",
+    "spark.kryoserializer.buffer.mb": "300",
+    "spark.executor.memory": "8g",
+    "es.index.auto.create": "true"
+  },
+  "algorithms": [
+    {
+      "comment": "setup for example 'Epinions' data",
+      "name": "ur",
+      "params": {
+        "appName": "Epinions",
+        "indexName": "mmrindex",
+        "typeName": "items",
+        "eventNames": ["rate", "trust"]
+      }
+    }
+  ]
+}
+
