@@ -31,7 +31,7 @@ import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsReques
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
+import org.elasticsearch.common.settings.Settings
 import org.joda.time.DateTime
 import org.json4s.jackson.JsonMethods._
 import org.elasticsearch.spark._

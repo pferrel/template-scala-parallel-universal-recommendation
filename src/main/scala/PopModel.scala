@@ -43,7 +43,7 @@ object PopModel {
       try {
         ISODateTimeFormat.dateTimeParser().parseDateTime(offsetDate.get)
       } catch {
-        case e: IllegalArgumentException => e
+        case e: IllegalArgumentException =>
           logger.warn("Bad end for popModel: " + offsetDate.get + " using 'now'")
           DateTime.now
       }
