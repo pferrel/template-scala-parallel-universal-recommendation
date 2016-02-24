@@ -84,19 +84,86 @@ def import_events(client, file):
   print "%s events are imported." % count
 
 
+# very simple dictionary to json string conversion
+def dict_to_jsonstr(d):
+  jsonstr = '{'
+  valcount = 0
+  for key_name in d:
+    if valcount > 0:
+      jsonstr += ', '
+    valcount += 1
+    jsonstr += '"' + snake_to_camel_case(key_name) + '":' + val_to_jsonstr(d[key_name])
+  jsonstr += '}'
+  return jsonstr
+
+# convert a x_yz string to xYz
+def snake_to_camel_case(key_name):
+  java_name = ""
+  saw_underscore = False
+  for c in key_name:
+    if c == '_':
+      saw_underscore = True
+    else:
+      if saw_underscore:
+        java_name += c.upper()
+        saw_underscore = False
+      else:
+        java_name += c
+  return java_name
+
+def list_to_jsonstr(l):
+  jsonstr = '['
+  valcount = 0
+  for val in l:
+    if valcount > 0:
+      jsonstr += ', '
+    valcount += 1
+    jsonstr += val_to_jsonstr(val)
+  jsonstr += ']'
+  return jsonstr
+
+def val_to_jsonstr(v):
+  jsonstr = ""
+  if type(v) is str:
+    jsonstr += '"' + v + '"'
+  elif type(v) is dict:
+    jsonstr += dict_to_jsonstr(v)
+  elif type(v) is list:
+    jsonstr += list_to_jsonstr(v)
+  else:
+    jsonstr += v
+  return jsonstr
+
+
+# provide an alternate client for the --json_out option
+class JsonClient:
+  def __init__(self, filename):
+    self.fp = open(filename, 'w')
+
+  def create_event(self, **kwargs):
+    jsonstr = dict_to_jsonstr(kwargs)
+    self.fp.write(jsonstr)
+    self.fp.write('\n')
+
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
     description="Import sample data for recommendation engine")
   parser.add_argument('--access_key', default='invald_access_key')
   parser.add_argument('--url', default="http://localhost:7070")
   parser.add_argument('--file', default="./data/sample-handmade-data.txt")
+  parser.add_argument('--json_out', default="my_events.json", help='write JSON-formatted events to this file instead')
 
   args = parser.parse_args()
   print args
 
-  client = predictionio.EventClient(
-    access_key=args.access_key,
-    url=args.url,
-    threads=5,
-    qsize=500)
+  if args.json_out is None:
+    client = predictionio.EventClient(
+      access_key=args.access_key,
+      url=args.url,
+      threads=5,
+      qsize=500)
+  else:
+    client = JsonClient(args.json_out)
+
   import_events(client, args.file)
