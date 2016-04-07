@@ -388,7 +388,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
   def buildQuery(ap: URAlgorithmParams, query: Query, backfillFieldName: String = ""): (String, List[Event]) = {
 
     try{ // require the minimum of a user or item, if not then return popular if any
-      //require( query.item.nonEmpty || query.user.nonEmpty, "Warning: a query must include either a user or item id")
 
       // create a list of all query correlators that can have a bias (boost or filter) attached
       val alluserEvents = getBiasedRecentUserActions(query)
@@ -524,19 +523,19 @@ class URAlgorithm(val ap: URAlgorithmParams)
       if (m != null) {
         val itemEventBias = query.itemBias.getOrElse(ap.itemBias.getOrElse(1f))
         val itemEventsBoost = if (itemEventBias > 0 && itemEventBias != 1) Some(itemEventBias) else None
-        ap.eventNames.map { action =>
+        queryEventNames.map { indicator =>
           val items = try {
-            if (m.containsKey(action) && m.get(action) != null) m.get(action).asInstanceOf[util.ArrayList[String]].toList
+            if (m.containsKey(indicator) && m.get(indicator) != null) m.get(indicator).asInstanceOf[util.ArrayList[String]].toList
             else List.empty[String]
           } catch {
             case cce: ClassCastException =>
-              logger.warn(s"Bad value in item ${query.item} corresponding to key: ${action} that was not a List[String]" +
+              logger.warn(s"Bad value in item ${query.item} corresponding to key: ${indicator} that was not a List[String]" +
                 " ignored.")
               List.empty[String]
           }
           val rItems = if (items.size <= ap.maxQueryEvents.getOrElse(defaultURAlgorithmParams.DefaultMaxQueryEvents))
             items else items.slice(0, ap.maxQueryEvents.getOrElse(defaultURAlgorithmParams.DefaultMaxQueryEvents) - 1)
-          BoostableCorrelators(action, rItems, itemEventsBoost)
+          BoostableCorrelators(indicator, rItems, itemEventsBoost)
         }
       } else List.empty[BoostableCorrelators] // no similar items
     } else List.empty[BoostableCorrelators] // no item specified

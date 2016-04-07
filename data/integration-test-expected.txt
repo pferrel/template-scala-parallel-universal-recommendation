@@ -20,7 +20,7 @@ Recommendations for user: U 2
 
 Recommendations for user: u-3
 
-{"itemScores":[{"item":"Iphone 4","score":0.18315871059894562},{"item":"Galaxy","score":0.18315871059894562},{"item":"Nexus","score":0.18315871059894562},{"item":"Ipad-retina","score":0.07201286405324936}]}
+{"itemScores":[{"item":"Galaxy","score":0.18315871059894562},{"item":"Iphone 4","score":0.18315871059894562},{"item":"Nexus","score":0.18315871059894562},{"item":"Ipad-retina","score":0.07201286405324936}]}
 
 Recommendations for user: u-4
 
@@ -28,7 +28,7 @@ Recommendations for user: u-4
 
 Recommendations for user: u5
 
-{"itemScores":[{"item":"Iphone 4","score":0.800000011920929},{"item":"Galaxy","score":0.800000011920929},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
+{"itemScores":[{"item":"Galaxy","score":0.800000011920929},{"item":"Iphone 4","score":0.800000011920929},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
 
 ============ simple similar item recs ============
 
@@ -38,7 +38,7 @@ Recommendations for item: Iphone 4
 
 Recommendations for item: Ipad-retina
 
-{"itemScores":[{"item":"Iphone 4","score":0.8768638968467712},{"item":"Galaxy","score":0.8768638968467712},{"item":"Nexus","score":0.23742027580738068},{"item":"Surface","score":0.04049335792660713}]}
+{"itemScores":[{"item":"Galaxy","score":0.8768638968467712},{"item":"Iphone 4","score":0.8768638968467712},{"item":"Nexus","score":0.23742027580738068},{"item":"Surface","score":0.04049335792660713}]}
 
 Recommendations for item: Nexus
 
@@ -50,21 +50,21 @@ Recommendations for item: Galaxy
 
 Recommendations for item: Surface
 
-{"itemScores":[{"item":"Iphone 4","score":0.4070388376712799},{"item":"Galaxy","score":0.4070388376712799},{"item":"Nexus","score":0.4070388376712799},{"item":"Ipad-retina","score":0.17534448206424713}]}
+{"itemScores":[{"item":"Galaxy","score":0.4070388376712799},{"item":"Iphone 4","score":0.4070388376712799},{"item":"Nexus","score":0.4070388376712799},{"item":"Ipad-retina","score":0.17534448206424713}]}
 
 ============ popular item recs only ============
 
 query with no item or user id, ordered by popularity
 
-{"itemScores":[{"item":"Iphone 4","score":0.0},{"item":"Galaxy","score":0.0},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
+{"itemScores":[{"item":"Galaxy","score":0.0},{"item":"Iphone 4","score":0.0},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
 
 Recommendations for non-existant user: xyz, all from popularity
 
-{"itemScores":[{"item":"Iphone 4","score":0.0},{"item":"Galaxy","score":0.0},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
+{"itemScores":[{"item":"Galaxy","score":0.0},{"item":"Iphone 4","score":0.0},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
 
 Recommendations for non-existant item: xyz, all from popularity
 
-{"itemScores":[{"item":"Iphone 4","score":0.0},{"item":"Galaxy","score":0.0},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
+{"itemScores":[{"item":"Galaxy","score":0.0},{"item":"Iphone 4","score":0.0},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
 
 Recommendations for no user no item, all from popularity, Tablets filter
 
@@ -72,7 +72,7 @@ Recommendations for no user no item, all from popularity, Tablets filter
 
 Recommendations for no user no item, all from popularity, Tablets boost
 
-{"itemScores":[{"item":"Nexus","score":0.9369767904281616},{"item":"Surface","score":0.6666666865348816},{"item":"Ipad-retina","score":0.204568549990654},{"item":"Iphone 4","score":0.0}]}
+{"itemScores":[{"item":"Nexus","score":0.9369767904281616},{"item":"Surface","score":0.6666666865348816},{"item":"Ipad-retina","score":0.204568549990654},{"item":"Galaxy","score":0.0}]}
 
 Recommendations for no user no item, all from popularity, Tablets boost, Estados Unidos Mexicanos filter
 
