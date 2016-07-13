@@ -1,0 +1,30 @@
+shopping-cart-1,add-to-cart,Iphone 6
+shopping-cart-1,add-to-cart,Iphone case
+shopping-cart-1,add-to-cart,Iphone charger
+shopping-cart-1,add-to-cart,Iphone earphones
+shopping-cart-2,add-to-cart,Nexus
+shopping-cart-2,add-to-cart,micro usb cable
+shopping-cart-3,add-to-cart,Surface
+shopping-cart-4,add-to-cart,Iphone 5
+shopping-cart-4,add-to-cart,Iphone case
+shopping-cart-4,add-to-cart,Iphone earphones
+shopping-cart-4,add-to-cart,Iphone 4
+shopping-cart-4,add-to-cart,Iphone usb cable
+shopping-cart-4,add-to-cart,Iphone charger
+shopping-cart-5,add-to-cart,Galaxy
+shopping-cart-5,add-to-cart,micro usb cable
+shopping-cart-6,add-to-cart,Iphone 6
+shopping-cart-6,add-to-cart,Iphone case
+shopping-cart-7,add-to-cart,Nexus
+shopping-cart-8,add-to-cart,Surface
+shopping-cart-9,add-to-cart,Iphone 5
+shopping-cart-9,add-to-cart,Iphone usb cable
+shopping-cart-9,add-to-cart,Iphone charger
+shopping-cart-10,add-to-cart,Galaxy
+shopping-cart-10,add-to-cart,Nexus
+shopping-cart-10,add-to-cart,micro usb cable
+shopping-cart-set-1,$set,items:Iphone 5,Iphone 4:Iphone 6
+shopping-cart-set-2,$set,items:Iphone charger:Iphone case:Iphone earphones:Iphone usb cable
+shopping-cart-set-3,$set,items:Nexus:Galaxy:micro usb cable
+shopping-cart-set-4,$set,items:Surface
+shopping-cart-set-5,$set,items:soap:legos:tooth paste

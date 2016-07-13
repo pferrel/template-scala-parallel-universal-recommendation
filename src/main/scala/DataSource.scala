@@ -36,9 +36,10 @@ import grizzled.slf4j.Logger
   *                   will be used to create the primary correlator and cross-cooccurrence secondary correlators.
   */
 case class DataSourceParams(
-   appName: String,
-   eventNames: List[String], // IMPORTANT: eventNames must be exactly the same as URAlgorithmParams eventNames
-   eventWindow: Option[EventWindow])
+  appName: String,
+  dataType: Option[String], // Defaults to None, meaning "user" or can be "itemSet" for shopping cart data
+  eventNames: List[String], // IMPORTANT: eventNames must be exactly the same as URAlgorithmParams eventNames
+  eventWindow: Option[EventWindow])
 extends Params
 
 /** Read specified events from the PEventStore and creates RDDs for each event. A list of pairs (eventName, eventRDD)
@@ -61,9 +62,12 @@ class DataSource(val dsp: DataSourceParams)
 
     cleanPersistedPEvents(sc)
 
+    //logger.info(s"DataType: ${dsp.dataType.getOrElse("user")}")
+    val entityTypeName = if (dsp.dataType.nonEmpty && dsp.dataType.get == "itemSet" ) "itemSet" else "user"
+    logger.info(s"EntityTypeName: ${entityTypeName}")
     val eventsRDD = PEventStore.find(
       appName = dsp.appName,
-      entityType = Some("user"),
+      entityType = Some(entityTypeName), // defaults to "user" but may be "itemSet" for shopping cart type data
       eventNames = Some(eventNames),
       targetEntityType = Some(Some("item")))(sc).repartition(sc.defaultParallelism)
 

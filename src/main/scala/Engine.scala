@@ -29,9 +29,10 @@ import io.prediction.controller.{EngineFactory, Engine}
 /** The Query spec with optional values. The only hard rule is that there must be either a user or
   * an item id. All other values are optional. */
 case class Query(
-    user: Option[String] = None, // must be a user or item id
+    user: Option[String] = None, // must be a user id
     userBias: Option[Float] = None, // default: whatever is in algorithm params or 1
-    item: Option[String] = None, // must be a user or item id
+    itemSet: Option[String] = None, // must be an item-set id, used for shopping carts or other items-sets
+    item: Option[String] = None, // must be an item id
     itemBias: Option[Float] = None, // default: whatever is in algorithm params or 1
     fields: Option[List[Field]] = None, // default: whatever is in algorithm params or None
     currentDate: Option[String] = None, // if used will override dateRange filter, currentDate must lie between the item's
@@ -59,7 +60,7 @@ case class DateRange(
     after: Option[String]) // both empty should be ignored
   extends Serializable
 
-/** results of a URAlgoritm.predict */
+/** results of a MMRAlgoritm.predict */
 case class PredictedResult(
     itemScores: Array[ItemScore])
   extends Serializable
