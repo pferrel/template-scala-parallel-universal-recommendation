@@ -602,54 +602,56 @@ class URAlgorithm(val ap: URAlgorithmParams)
   def getBiasedItemSetContents(
     query: Query): Seq[BoostableCorrelators] = {
 
-    logger.info(s"Qurey: ${query.toString}")
-    logger.info(s"Id for itemSet: ${query.itemSet.getOrElse("No ID")}")
-    val items = try {
-      val isEvents = LEventStore.find(
-        appName = ap.appName,
-        entityType = Some("itemSet"),
-        entityId = query.itemSet,
-        // todo: set time limit to avoid super long DB access, should be configurable
-        timeout = Duration(200, "millis")
-      )
+    if(query.itemSet.nonEmpty) {
+      logger.info(s"Qurey: ${query.toString}")
+      logger.info(s"Id for itemSet: ${query.itemSet.getOrElse("No ID")}")
+      val items = try {
+        val isEvents = LEventStore.find(
+          appName = ap.appName,
+          entityType = Some("itemSet"),
+          entityId = query.itemSet,
+          // todo: set time limit to avoid super long DB access, should be configurable
+          timeout = Duration(200, "millis")
+        )
 
-      //logger.info(s"Got proptery events for itemSet: ${query.itemSet.getOrElse("No ID")}")
+        //logger.info(s"Got proptery events for itemSet: ${query.itemSet.getOrElse("No ID")}")
 
-      // this allows teh properties to be changed over time, so aggreagate to get the latest
-      val itemSet = LEventAggregator.aggregateProperties(isEvents).get(query.itemSet.getOrElse("No ID"))
+        // this allows teh properties to be changed over time, so aggreagate to get the latest
+        val itemSet = LEventAggregator.aggregateProperties(isEvents).get(query.itemSet.getOrElse("No ID"))
 
-      //logger.info(s"Got aggregated properties: ${itemSet.toString()}")
-      //Got aggregated properties: Some(PropertyMap(Map(items -> JArray(List(JString(Iphone charger), JString(Iphone case), JString(Iphone earphones), JString(Iphone usb cable)))), 2016-06-13T19:59:21.402Z, 2016-06-13T19:59:21.402Z))
+        //logger.info(s"Got aggregated properties: ${itemSet.toString()}")
+        //Got aggregated properties: Some(PropertyMap(Map(items -> JArray(List(JString(Iphone charger), JString(Iphone case), JString(Iphone earphones), JString(Iphone usb cable)))), 2016-06-13T19:59:21.402Z, 2016-06-13T19:59:21.402Z))
 
-      val isItems = itemSet.get.get[List[JValue]]("items")
+        val isItems = itemSet.get.get[List[JValue]]("items")
 
-      logger.info(s"Got properties: ${isItems}")
+        logger.info(s"Got properties: ${isItems}")
 
-      isItems.map {
-        case JString(s) =>
-          //logger.info(s"got string ${s}")
-          s
-        case _ => // not sure what this is snf it's a minor error
-          logger.info("unrecognized property type")
-          ""
+        isItems.map {
+          case JString(s) =>
+            //logger.info(s"got string ${s}")
+            s
+          case _ => // not sure what this is snf it's a minor error
+            logger.info("unrecognized property type")
+            ""
+        }
+      } catch {
+        case e: scala.concurrent.TimeoutException =>
+          logger.error(s"Timeout when reading itemSet contents." +
+            s" Empty list is used. ${e}")
+          List.empty[String]
+        case e: NoSuchElementException => // todo: bad form to use an exception to check if there is an id
+          logger.info("No itemSet id for recs, may cause an empty query to Elasticsearch")
+          List.empty[String]
+        case e: Exception => // fatal because of error, an empty query
+          logger.error(s"Error when reading itemSet: ${e}")
+          throw e
       }
-    } catch {
-      case e: scala.concurrent.TimeoutException =>
-        logger.error(s"Timeout when reading itemSet contents." +
-          s" Empty list is used. ${e}")
-        List.empty[String]
-      case e: NoSuchElementException => // todo: bad form to use an exception to check if there is an id
-        logger.info("No itemSet id for recs, may cause an empty query to Elasticsearch")
-        List.empty[String]
-      case e: Exception => // fatal because of error, an empty query
-        logger.error(s"Error when reading itemSet: ${e}")
-        throw e
-    }
 
 
-    val itemSetBias = query.userBias.getOrElse(ap.userBias.getOrElse(1f))
-    val itemSetBoost = if (itemSetBias > 0 && itemSetBias != 1) Some(itemSetBias) else None
-    List(BoostableCorrelators(ap.eventNames.head, items.distinct, itemSetBoost))
+      val itemSetBias = query.userBias.getOrElse(ap.userBias.getOrElse(1f))
+      val itemSetBoost = if (itemSetBias > 0 && itemSetBias != 1) Some(itemSetBias) else None
+      List(BoostableCorrelators(ap.eventNames.head, items.distinct, itemSetBoost))
+    } else List.empty[BoostableCorrelators]
   }
 
   /** get all metadata fields that potentially have boosts (not filters) */
