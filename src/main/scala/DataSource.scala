@@ -57,11 +57,22 @@ class DataSource(val dsp: DataSourceParams)
     ("Event window", eventWindow),
     ("Event names", dsp.eventNames)))
 
-  /** Reads events from PEventStore and create and RDD for each */
+  /** Reads events from PEventStore and create an RDD for each */
   override def readTraining(sc: SparkContext): TrainingData = {
 
     val eventNames = dsp.eventNames
     cleanPersistedPEvents(sc)
+
+    // create a BiMap of all user-ids for the primary/conversion indicator
+
+    val userDictionary = PEventStore.find(
+      appName = dsp.appName,
+      entityType = Some("user"),
+      eventNames = Some(List[String](eventNames.head)),
+      targetEntityType = Some(Some("item")))(sc).repartition(sc.defaultParallelism)
+        .foreachPartition( it => )
+
+
     val eventsRDD = PEventStore.find(
       appName = dsp.appName,
       entityType = Some("user"),
