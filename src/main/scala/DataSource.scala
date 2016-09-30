@@ -63,16 +63,6 @@ class DataSource(val dsp: DataSourceParams)
     val eventNames = dsp.eventNames
     cleanPersistedPEvents(sc)
 
-    // create a BiMap of all user-ids for the primary/conversion indicator
-
-    val userDictionary = PEventStore.find(
-      appName = dsp.appName,
-      entityType = Some("user"),
-      eventNames = Some(List[String](eventNames.head)),
-      targetEntityType = Some(Some("item")))(sc).repartition(sc.defaultParallelism)
-        .foreachPartition( it => )
-
-
     val eventsRDD = PEventStore.find(
       appName = dsp.appName,
       entityType = Some("user"),
