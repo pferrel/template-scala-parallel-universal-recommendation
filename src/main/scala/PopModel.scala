@@ -115,12 +115,17 @@ class PopModel(fieldsRDD: RDD[(ItemID, ItemProps)])(implicit sc: SparkContext) {
     eventNames: Seq[String],
     interval: Interval): RDD[(ItemID, Double)] = {
     val events = eventsRDD(appName, eventNames, interval)
+/*  old code with unneeded groupByKey
     events.map { e => (e.targetEntityId, e.event) }
       .groupByKey()
-      .map { case (itemID, itEvents) => (itemID.get, itEvents.size.toDouble) }
+      .map { case(itemID, itEvents) => (itemID.get, itEvents.size.toFloat)}
+      .reduceByKey (_+_) // make this a double in Elaseticsearch)
+*/
+    events.map { e => (e.targetEntityId, e.event) }
+      .map { case (itemID, _) => (itemID.get, 1D) }
       .reduceByKey(_ + _) // make this a double in Elaseticsearch)
   }
-
+  
   /** Creates a rank for each item by dividing the duration in two and counting named events in both buckets
    *  then dividing most recent by less recent. This ranks by change in popularity or velocity of populatiy change.
    *  Interval(start, end) end instant is always greater than or equal to the start instant.
