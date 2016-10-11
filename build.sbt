@@ -8,7 +8,7 @@ version := "0.5.0-SNAPSHOT"
 
 organization := "com.actionml"
 
-val mahoutVersion = "0.12.3-SNAPSHOT"
+val mahoutVersion = "0.13.0-SNAPSHOT"
 
 libraryDependencies ++= Seq(
   "io.prediction"    %% "core" % pioVersion.value % "provided",
