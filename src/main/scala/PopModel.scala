@@ -115,7 +115,7 @@ class PopModel(fieldsRDD: RDD[(ItemID, ItemProps)])(implicit sc: SparkContext) {
     eventNames: Seq[String],
     interval: Interval): RDD[(ItemID, Double)] = {
     val events = eventsRDD(appName, eventNames, interval)
-/*  old code with unneeded groupByKey
+    /*  old code with unneeded groupByKey
     events.map { e => (e.targetEntityId, e.event) }
       .groupByKey()
       .map { case(itemID, itEvents) => (itemID.get, itEvents.size.toFloat)}
