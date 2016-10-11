@@ -6,8 +6,13 @@
   "datasource": {
     "params" : {
       "name": "sample-handmade-data.txt",
-      "appName": "tui-un-big-prod",
-      "eventNames": ["buy", "pre", "hm", "pc", "dur", "da", "pv"]
+      "appName": "handmade",
+      "eventNames": ["purchase", "view"],
+      "eventWindow": {
+        "duration": "24 days",
+        "removeDuplicates":true,
+        "compressProperties":true
+      }
     }
   },
   "sparkConf": {
@@ -15,39 +20,29 @@
     "spark.kryo.registrator": "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator",
     "spark.kryo.referenceTracking": "false",
     "spark.kryoserializer.buffer": "300m",
-    "es.index.auto.create": "true",
-    "es.nodes": "ip-172-16-0-202.eu-central-1.compute.internal,ip-172-16-7-139.eu-central-1.compute.internal",
+    "es.index.auto.create": "true"
   },
   "algorithms": [
     {
       "comment": "simplest setup where all values are default, popularity based backfill, must add eventsNames",
       "name": "ur",
       "params": {
-        "appName": "tui-un-big-prod",
-        "indexName": "un-big-prod",
+        "appName": "handmade",
+        "indexName": "urindex",
         "typeName": "items",
         "comment": "must have data for the first event or the model will not build, other events are optional",
         "indicators": [
           {
-            "name": "buy"
+            "name": "purchase"
           },{
-            "name": "pre",
-            "maxCorrelatorsPerItem": 1
-          },{
-            "name": "hm",
-            "maxCorrelatorsPerItem": 1
-          },{
-            "name": "pc"
-          },{
-            "name": "dur"
-          },{
-            "name": "da",
-            "maxCorrelatorsPerItem": 1
-          },{
-            "name": "pv",
-            "maxCorrelatorsPerItem": 1
+            "name": "view",
+            "maxCorrelatorsPerItem": 50
           }
-        ]
+        ],
+        "availableDateName": "available",
+        "expireDateName": "expires",
+        "dateName": "date",
+        "num": 4
       }
     }
   ]
