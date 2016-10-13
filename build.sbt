@@ -8,10 +8,12 @@ version := "0.5.0-SNAPSHOT"
 
 organization := "com.actionml"
 
-val mahoutVersion = "0.12.3-SNAPSHOT"
+val mahoutVersion = "0.13.0-SNAPSHOT"
+
+val pioVersion = "0.9.7-aml"
 
 libraryDependencies ++= Seq(
-  "io.prediction"    %% "core" % pioVersion.value % "provided",
+  "io.prediction"    %% "core" % pioVersion % "provided",
   "org.apache.spark" %% "spark-core" % "1.4.0" % "provided",
   "org.apache.spark" %% "spark-mllib" % "1.4.0" % "provided",
   "org.xerial.snappy" % "snappy-java" % "1.1.1.7",
@@ -33,6 +35,7 @@ libraryDependencies ++= Seq(
   .map(_.exclude("org.apache.lucene","lucene-core")).map(_.exclude("org.apache.lucene","lucene-analyzers-common"))
 
 resolvers += Resolver.mavenLocal
+
 
 SbtScalariform.scalariformSettings
 
