@@ -109,7 +109,7 @@ case class BackfillField(
   // to use in calculation of backfill
 
 case class IndicatorParams(
-  eventName: String, // must match one in eventNames
+  name: String, // must match one in eventNames
   maxItemsPerUser: Option[Int], // defaults to maxEventsPerEventType
   maxCorrelatorsPerItem: Option[Int], // defaults to maxCorrelatorsPerEventType
   minLLR: Option[Double]) // defaults to none, takes precendence over maxCorrelatorsPerItem
@@ -119,7 +119,7 @@ case class URAlgorithmParams(
   indexName: String, // can optionally be used to specify the elasticsearch index name
   typeName: String, // can optionally be used to specify the elasticsearch type name
   recsModel: Option[String] = None, // "all", "collabFiltering", "backfill"
-  eventNames: List[String], // names used to ID all user actions
+  eventNames: Option[List[String]], // names used to ID all user actions
   blacklistEvents: Option[List[String]] = None,// None means use the primary event, empty array means no filter
   // number of events in user-based recs query
   maxQueryEvents: Option[Int] = None,
@@ -154,6 +154,14 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
   case class BoostableCorrelators(actionName: String, itemIDs: Seq[String], boost: Option[Float])
   case class FilterCorrelators(actionName: String, itemIDs: Seq[String])
+
+  lazy val modelEventNames = if (ap.indicators.isEmpty) {
+    if (ap.eventNames.isEmpty) {
+      throw new IllegalArgumentException("No eventNames or indicators in engine.json and one of these is required")
+    } else ap.eventNames.get
+  } else {
+    ap.indicators.get.map(_.name)
+  }
 
   @transient lazy val logger = Logger[this.type]
 
@@ -226,7 +234,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
       val durationString = ap.backfillField.getOrElse(defaultURAlgorithmParams.DefaultBackfillParams).duration
         .getOrElse(defaultURAlgorithmParams.DefaultBackfillDuration)
       val duration = Duration(durationString).toSeconds.toInt
-      val backfillEvents = backfillParams.eventNames.getOrElse(List(ap.eventNames.head))
+      val backfillEvents = backfillParams.eventNames.getOrElse(List(modelEventNames.head))
       val end = ap.backfillField.getOrElse(defaultURAlgorithmParams.DefaultBackfillParams)
         .offsetDate
       PopModel.calc(
@@ -270,7 +278,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
     backfillFieldName: String = ""): NullModel = {
 
     val backfillParams = ap.backfillField.getOrElse(defaultURAlgorithmParams.DefaultBackfillParams)
-    val backfillEvents = backfillParams.eventNames.getOrElse(List(ap.eventNames.head))//default to first/primary event
+    val backfillEvents = backfillParams.eventNames.getOrElse(List(modelEventNames.head))//default to first/primary event
     val durationString = ap.backfillField.getOrElse(defaultURAlgorithmParams.DefaultBackfillParams).duration
         .getOrElse(defaultURAlgorithmParams.DefaultBackfillDuration)
     val duration = Duration(durationString).toSeconds.toInt
@@ -401,7 +409,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
     //logger.info(s"Query received, user id: ${query.user}, item id: ${query.item}")
     logger.info(s"Query BackFillField: ${ap.backfillField}")
 
-    queryEventNames = query.eventNames.getOrElse(ap.eventNames) // eventNames in query take precedence for the query
+    queryEventNames = query.eventNames.getOrElse(modelEventNames) // eventNames in query take precedence for the query
     // part of their use
     val backfillFieldName = ap.backfillField.getOrElse(BackfillField()).name
     logger.info(s"PopModel using fieldName: ${backfillFieldName}")
@@ -532,7 +540,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
         // either a list or an empty list of filtering events so honor them
         if (ap.blacklistEvents.get == List.empty[String]) false // no filtering events so all are allowed
         else ap.blacklistEvents.get.contains(event.event) // if its filtered remove it, else allow
-      } else ap.eventNames(0).equals(event.event) // remove the primary event if nothing specified
+      } else modelEventNames(0).equals(event.event) // remove the primary event if nothing specified
     }.map (_.targetEntityId.getOrElse("")) ++ query.blacklistItems.getOrElse(List.empty[String])
       .distinct
 
@@ -553,7 +561,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
       if (m != null) {
         val itemEventBias = query.itemBias.getOrElse(ap.itemBias.getOrElse(1f))
         val itemEventsBoost = if (itemEventBias > 0 && itemEventBias != 1) Some(itemEventBias) else None
-        ap.eventNames.map { action =>
+        modelEventNames.map { action =>
           val items = try {
             if (m.containsKey(action) && m.get(action) != null) m.get(action).asInstanceOf[util.ArrayList[String]].toList
             else List.empty[String]
