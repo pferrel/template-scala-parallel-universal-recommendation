@@ -60,7 +60,8 @@ echo $ACCESS_KEY
 python examples/import_handmade.py --access_key $ACCESS_KEY
 
 echo ""
-echo "Building and delpoying model"
+echo "Building, training, and delpoying model"
+rm target/scala-2.10/*.jar
 pio build
 pio train  -- --driver-memory 4g --executor-memory 4g
 echo "Model will remain deployed after this test"
