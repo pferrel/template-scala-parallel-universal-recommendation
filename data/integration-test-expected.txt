@@ -13,7 +13,7 @@ NOTE: due to available and expire dates you should never see the Iphone 5 or Iph
 
 Recommendations for user: u1
 
-{"itemScores":[{"item":"Iphone 4","score":0.0},{"item":"Galaxy","score":0.0},{"item":"Nexus","score":0.0},{"item":"Ipad-retina","score":0.0}]}
+{"itemScores":[{"item":"Galaxy","score":0.24102726578712463},{"item":"Nexus","score":0.24102726578712463},{"item":"Surface","score":0.05261862277984619}]}
 
 Recommendations for user: U 2
 
