@@ -44,8 +44,9 @@ case class Query(
   num: Option[Int] = None, // default: whatever is in algorithm params, which itself has a default--probably 20
   eventNames: Option[List[String]], // names used to ID all user actions
   withRanks: Option[Boolean] = None, // Add to ItemScore rank fields values, default fasle
-  excludeFields: Option[List[excludeField]]) // blacklist fields specified in query
+  excludeFields: Option[List[excludeField]]) // blacklist fields specified in query 
     extends Serializable
+
 
 /** Used to specify how Fields are represented in engine.json */
 case class Field( // no optional values for fields, whne specified
