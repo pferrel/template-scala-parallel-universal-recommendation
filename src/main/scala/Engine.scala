@@ -56,6 +56,11 @@ case class Field( // no optional values for fields, whne specified
   bias: Float) // any positive value is a boost, negative is a filter
     extends Serializable
 
+/** Used to specify how exclude fields are represented in engine.json */
+case class excludeField(
+  name: String, // name of metadata field
+  values: List[String]) // fields can have multiple values like tags of a single value as when using hierarchical
+  
 /** Used to specify the date range for a query */
 case class DateRange(
   name: String, // name of item property for the date comparison
