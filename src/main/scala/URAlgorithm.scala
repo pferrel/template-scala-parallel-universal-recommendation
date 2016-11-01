@@ -526,23 +526,27 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
   /** Create a list of item ids that the user has interacted with or are not to be included in recommendations */
   def getExcludedItems(userEvents: List[Event], query: Query): List[String] = {
+    if (ap.blacklistEvents.getOrElse(List.empty[String]) != List.empty[String]) {
 
-    val blacklistedItems = userEvents.filter { event =>
-      if (ap.blacklistEvents.nonEmpty) {
-        // either a list or an empty list of filtering events so honor them
-        if (ap.blacklistEvents.get == List.empty[String]) false // no filtering events so all are allowed
-        else ap.blacklistEvents.get.contains(event.event) // if its filtered remove it, else allow
-      } else ap.eventNames(0).equals(event.event) // remove the primary event if nothing specified
-    }.map (_.targetEntityId.getOrElse("")) ++ query.blacklistItems.getOrElse(List.empty[String])
-      .distinct
+      val blacklistedItems = userEvents.filter { event =>
+        if (ap.blacklistEvents.nonEmpty) {
+          // either a list or an empty list of filtering events so honor them
+          if (ap.blacklistEvents.get == List.empty[String]) false // no filtering events so all are allowed
+          else ap.blacklistEvents.get.contains(event.event) // if its filtered remove it, else allow
+        } else ap.eventNames(0).equals(event.event) // remove the primary event if nothing specified
+      }.map(_.targetEntityId.getOrElse("")) ++ query.blacklistItems.getOrElse(List.empty[String])
+        .distinct
 
-    // Now conditionally add the query item itself
-    val includeSelf = query.returnSelf.getOrElse(ap.returnSelf.getOrElse(false))
-    val allExcludedItems = if ( !includeSelf && query.item.nonEmpty )
-      blacklistedItems :+ query.item.get // add the query item to be excuded
-    else
-      blacklistedItems
-    allExcludedItems.distinct
+      // Now conditionally add the query item itself
+      val includeSelf = query.returnSelf.getOrElse(ap.returnSelf.getOrElse(false))
+      val allExcludedItems = if (!includeSelf && query.item.nonEmpty)
+        blacklistedItems :+ query.item.get // add the query item to be excuded
+      else
+        blacklistedItems
+      allExcludedItems.distinct
+    } else {
+      List.empty[String]
+    }
   }
 
   /** Get similar items for an item, these are already in the action correlators in ES */
