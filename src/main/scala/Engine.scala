@@ -43,8 +43,11 @@ case class Query(
   // to what is in the algorithm params or false
   num: Option[Int] = None, // default: whatever is in algorithm params, which itself has a default--probably 20
   eventNames: Option[List[String]], // names used to ID all user actions
-  withRanks: Option[Boolean] = None) // Add to ItemScore rank fields values, default fasle
+  withRanks: Option[Boolean] = None, // Add to ItemScore rank fields values, default fasle
+  excludeFields: Option[List[excludeField]], // blacklist fields specified in query 
+  numericRangeFilter: Option[List[RangeField]]) // numeric range filter
     extends Serializable
+
 
 /** Used to specify how Fields are represented in engine.json */
 case class Field( // no optional values for fields, whne specified
@@ -53,6 +56,19 @@ case class Field( // no optional values for fields, whne specified
   // taxonomies
   bias: Float) // any positive value is a boost, negative is a filter
     extends Serializable
+
+/** Used to specify how exclude fields are represented in engine.json */
+case class excludeField(
+  name: String, // name of metadata field
+  values: List[String]) // fields can have multiple values like tags of a single value as when using hierarchical
+  
+/** Used to specify the numeric range for a query */
+case class RangeField(
+  name: String,
+  greaterThan: Option[Float],
+  lessThan: Option[Float],
+  greaterThanOrEqual: Option[Float],
+  lessThanOrEqual: Option[Float])
 
 /** Used to specify the date range for a query */
 case class DateRange(

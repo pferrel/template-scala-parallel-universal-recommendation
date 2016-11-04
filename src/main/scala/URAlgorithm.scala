@@ -156,7 +156,8 @@ case class URAlgorithmParams(
   // used as the subject of a dateRange in queries, specifies the name of the item property
   dateName: Option[String] = None,
   indicators: Option[List[IndicatorParams]] = None, // control params per matrix pair
-  seed: Option[Long] = None) // seed is not used presently
+  seed: Option[Long] = None, // seed is not used presently
+  excludeFields: Option[List[excludeField]] = None) //exclude fields specified in engine.json
     extends Params //fixed default make it reproducible unless supplied
 
 /** Creates cooccurrence, cross-cooccurrence and eventually content correlators with
@@ -177,6 +178,8 @@ class URAlgorithm(val ap: URAlgorithmParams)
     }
   }
   case class FilterCorrelators(actionName: String, itemIDs: Seq[ItemID])
+
+  case class blacklistFields(name: String, values: List[String])
 
   val appName: String = ap.appName
   val recsModel: String = ap.recsModel.getOrElse(defaultURAlgorithmParams.DefaultRecsModel)
@@ -208,6 +211,8 @@ class URAlgorithm(val ap: URAlgorithmParams)
     }
     eventNames
   }
+
+  val excludeFields: List[excludeField] = ap.excludeFields.getOrElse(List.empty)
 
   // Unique by 'type' ranking params, if collision get first.
   lazy val rankingsParams: Seq[RankingParams] = ap.rankings.getOrElse(Seq(RankingParams(
@@ -611,20 +616,40 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
     val filteringMetadata = getFilteringMetadata(query)
     val filteringDateRange = getFilteringDateRange(query)
+    val filteringNumericRange = getFilteringNumericRange(query)
     val allFilteringCorrelators = recentUserHistoryFilter ++ similarItemsFilter ++ filteringMetadata
 
     val mustFields: Seq[JValue] = allFilteringCorrelators.map {
       case FilterCorrelators(actionName, itemIDs) =>
         render("terms" -> (actionName -> itemIDs) ~ ("boost" -> 0))
     }
-    mustFields ++ filteringDateRange
+    mustFields ++ filteringDateRange ++ filteringNumericRange
   }
 
   /** Build not must query part */
-  def buildQueryMustNot(query: Query, events: Seq[Event]): JValue = {
+  def buildQueryMustNot(query: Query, events: Seq[Event]): List[JValue] = {
+    var excludeFieldsList = List[JValue]()
+    val paramsBlacklistField = excludeFields
+    val queryBlacklistField = query.excludeFields.getOrElse(List.empty)
+
+    //de-duplicate common fields provided in engine.json and query
+    val deduplicateFields = (paramsBlacklistField ::: queryBlacklistField).map(field => blacklistFields(field.name, field.values)).distinct
+    
+    deduplicateFields.foreach { field =>
+      val excludeFieldJValue: JValue = render("terms" -> (field.name -> field.values))
+      excludeFieldsList ::= excludeFieldJValue
+    }
+
     val mustNotFields: JValue = render("ids" -> ("values" -> getExcludedItems(events, query)) ~ ("boost" -> 0))
-    mustNotFields
+    excludeFieldsList ::= mustNotFields
+    excludeFieldsList
   }
+
+  /** Build not must query part */
+//   def buildQueryMustNot(query: Query, events: Seq[Event]): JValue = {
+//     val mustNotFields: JValue = render("ids" -> ("values" -> getExcludedItems(events, query)) ~ ("boost" -> 0))
+//     mustNotFields
+//   }
 
   /** Build sort query part */
   def buildQuerySort(): Seq[JValue] = if (recsModel == RecsModel.All || recsModel == RecsModel.BF) {
@@ -843,7 +868,186 @@ class URAlgorithm(val ap: URAlgorithmParams)
     }
     json
   }
+  
+  def getFilteringNumericRange(query: Query): Seq[JValue] = {
+    var json = Seq[JValue]()
+    if (query.numericRangeFilter.nonEmpty) {
+      val numericRanges = query.numericRangeFilter.getOrElse(List.empty)
+      numericRanges.foreach { numericRange =>
+        val name = numericRange.name
+        if (numericRange.greaterThan.nonEmpty && numericRange.lessThan.nonEmpty) {
+          val greaterThan = numericRange.greaterThan.get
+          val lessThan = numericRange.lessThan.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |           "gt": $greaterThan,
+                 |           "lt": $lessThan
+                 |           }
+                 |         }
+                 |       },
+                 |      "boost": 0
+                 |   }
+                 |}
+              """.stripMargin
+          json = json :+ parse(range)
+        } else if (numericRange.greaterThan.nonEmpty && numericRange.lessThanOrEqual.nonEmpty) {
+          val greaterThan = numericRange.greaterThan.get
+          val lessThanOrEqual = numericRange.lessThanOrEqual.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |      "filter": {
+                 |        "range": {
+                 |          "$name": {
+                 |            "gt": $greaterThan,
+                 |            "lte": $lessThanOrEqual
+                 |            }
+                 |         }
+                 |       },
+                 |       "boost": 0
+                 |    }
+                 |}
+              """.stripMargin
+          json = json :+ parse(range)
+        } else if (numericRange.greaterThanOrEqual.nonEmpty && numericRange.lessThan.nonEmpty) {
+          val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
+          val lessThan = numericRange.lessThan.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "gte": $greaterThanOrEqual,
+                 |          "lt": $lessThan
+                 |          }
+                 |        }
+                 |      },
+                 |      "boost": 0
+                 |    }
+                 |}
+              """.stripMargin
+          json = json :+ parse(range)
+        } else if (numericRange.greaterThanOrEqual.nonEmpty && numericRange.lessThanOrEqual.nonEmpty) {
+          val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
+          val lessThanOrEqual = numericRange.lessThanOrEqual.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "gte": $greaterThanOrEqual,
+                 |          "lte": $lessThanOrEqual
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+            """.stripMargin
 
+          json = json :+ parse(range)
+
+        } else if (numericRange.greaterThan.nonEmpty) {
+          val greaterThan = numericRange.greaterThan.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "gt": $greaterThan
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+        """.stripMargin
+
+          json = json :+ parse(range)
+
+        } else if (numericRange.greaterThanOrEqual.nonEmpty) {
+          val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "gte": $greaterThanOrEqual
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+            """.stripMargin
+
+          json = json :+ parse(range)
+
+        } else if (numericRange.lessThan.nonEmpty) {
+          val lessThan = numericRange.lessThan.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "lt": $lessThan
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+            """.stripMargin
+
+          json = json :+ parse(range)
+
+        } else if (numericRange.lessThanOrEqual.nonEmpty) {
+          val lessThanOrEqual = numericRange.lessThanOrEqual.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "lte": $lessThanOrEqual
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+              """.stripMargin
+
+          json = json :+ parse(range)
+
+        } else {
+          logger.info(
+            """
+                |Misconfigured range information, your query's numeric Range is incorrect.
+                |Ingoring  range information for this query.""".stripMargin)
+          Seq.empty
+        }
+      }
+    }
+    json
+  }
   def getRankingMapping: Map[String, String] = rankingFieldNames map { fieldName =>
     fieldName -> "float"
   } toMap
