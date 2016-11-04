@@ -616,13 +616,14 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
     val filteringMetadata = getFilteringMetadata(query)
     val filteringDateRange = getFilteringDateRange(query)
+    val filteringNumericRange = getFilteringNumericRange(query)
     val allFilteringCorrelators = recentUserHistoryFilter ++ similarItemsFilter ++ filteringMetadata
 
     val mustFields: Seq[JValue] = allFilteringCorrelators.map {
       case FilterCorrelators(actionName, itemIDs) =>
         render("terms" -> (actionName -> itemIDs) ~ ("boost" -> 0))
     }
-    mustFields ++ filteringDateRange
+    mustFields ++ filteringDateRange ++ filteringNumericRange
   }
 
   /** Build not must query part */
