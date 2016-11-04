@@ -44,7 +44,8 @@ case class Query(
   num: Option[Int] = None, // default: whatever is in algorithm params, which itself has a default--probably 20
   eventNames: Option[List[String]], // names used to ID all user actions
   withRanks: Option[Boolean] = None, // Add to ItemScore rank fields values, default fasle
-  excludeFields: Option[List[excludeField]]) // blacklist fields specified in query 
+  excludeFields: Option[List[excludeField]], // blacklist fields specified in query 
+  numericRangeFilter: Option[List[RangeField]]) // numeric range filter
     extends Serializable
 
 
@@ -61,6 +62,14 @@ case class excludeField(
   name: String, // name of metadata field
   values: List[String]) // fields can have multiple values like tags of a single value as when using hierarchical
   
+/** Used to specify the numeric range for a query */
+case class RangeField(
+  name: String,
+  greaterThan: Option[Float],
+  lessThan: Option[Float],
+  greaterThanOrEqual: Option[Float],
+  lessThanOrEqual: Option[Float])
+
 /** Used to specify the date range for a query */
 case class DateRange(
   name: String, // name of item property for the date comparison
