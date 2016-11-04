@@ -876,7 +876,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
       numericRanges.foreach { numericRange =>
         val name = numericRange.name
         if (numericRange.greaterThan.nonEmpty && numericRange.lessThan.nonEmpty) {
-          // val name = numericRange.name
           val greaterThan = numericRange.greaterThan.get
           val lessThan = numericRange.lessThan.get
           val range =
@@ -897,7 +896,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
               """.stripMargin
           json = json :+ parse(range)
         } else if (numericRange.greaterThan.nonEmpty && numericRange.lessThanOrEqual.nonEmpty) {
-          //val name = numericRange.name
           val greaterThan = numericRange.greaterThan.get
           val lessThanOrEqual = numericRange.lessThanOrEqual.get
           val range =
@@ -918,7 +916,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
               """.stripMargin
           json = json :+ parse(range)
         } else if (numericRange.greaterThanOrEqual.nonEmpty && numericRange.lessThan.nonEmpty) {
-          //val name = numericRange.name
           val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
           val lessThan = numericRange.lessThan.get
           val range =
@@ -939,7 +936,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
               """.stripMargin
           json = json :+ parse(range)
         } else if (numericRange.greaterThanOrEqual.nonEmpty && numericRange.lessThanOrEqual.nonEmpty) {
-          //val name = numericRange.name
           val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
           val lessThanOrEqual = numericRange.lessThanOrEqual.get
           val range =
@@ -962,7 +958,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
           json = json :+ parse(range)
 
         } else if (numericRange.greaterThan.nonEmpty) {
-          //val name = numericRange.name
           val greaterThan = numericRange.greaterThan.get
           val range =
             s"""
@@ -983,7 +978,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
           json = json :+ parse(range)
 
         } else if (numericRange.greaterThanOrEqual.nonEmpty) {
-          //val name = numericRange.name
           val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
           val range =
             s"""
@@ -1004,7 +998,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
           json = json :+ parse(range)
 
         } else if (numericRange.lessThan.nonEmpty) {
-          //val name = numericRange.name
           val lessThan = numericRange.lessThan.get
           val range =
             s"""
@@ -1025,7 +1018,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
           json = json :+ parse(range)
 
         } else if (numericRange.lessThanOrEqual.nonEmpty) {
-          //val name = numericRange.name
           val lessThanOrEqual = numericRange.lessThanOrEqual.get
           val range =
             s"""
