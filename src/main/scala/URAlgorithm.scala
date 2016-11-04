@@ -867,7 +867,194 @@ class URAlgorithm(val ap: URAlgorithmParams)
     }
     json
   }
+  
+  def getFilteringNumericRange(query: Query): Seq[JValue] = {
+    var json = Seq[JValue]()
+    if (query.numericRangeFilter.nonEmpty) {
+      val numericRanges = query.numericRangeFilter.getOrElse(List.empty)
+      numericRanges.foreach { numericRange =>
+        val name = numericRange.name
+        if (numericRange.greaterThan.nonEmpty && numericRange.lessThan.nonEmpty) {
+          // val name = numericRange.name
+          val greaterThan = numericRange.greaterThan.get
+          val lessThan = numericRange.lessThan.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |           "gt": $greaterThan,
+                 |           "lt": $lessThan
+                 |           }
+                 |         }
+                 |       },
+                 |      "boost": 0
+                 |   }
+                 |}
+              """.stripMargin
+          json = json :+ parse(range)
+        } else if (numericRange.greaterThan.nonEmpty && numericRange.lessThanOrEqual.nonEmpty) {
+          //val name = numericRange.name
+          val greaterThan = numericRange.greaterThan.get
+          val lessThanOrEqual = numericRange.lessThanOrEqual.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |      "filter": {
+                 |        "range": {
+                 |          "$name": {
+                 |            "gt": $greaterThan,
+                 |            "lte": $lessThanOrEqual
+                 |            }
+                 |         }
+                 |       },
+                 |       "boost": 0
+                 |    }
+                 |}
+              """.stripMargin
+          json = json :+ parse(range)
+        } else if (numericRange.greaterThanOrEqual.nonEmpty && numericRange.lessThan.nonEmpty) {
+          //val name = numericRange.name
+          val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
+          val lessThan = numericRange.lessThan.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "gte": $greaterThanOrEqual,
+                 |          "lt": $lessThan
+                 |          }
+                 |        }
+                 |      },
+                 |      "boost": 0
+                 |    }
+                 |}
+              """.stripMargin
+          json = json :+ parse(range)
+        } else if (numericRange.greaterThanOrEqual.nonEmpty && numericRange.lessThanOrEqual.nonEmpty) {
+          //val name = numericRange.name
+          val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
+          val lessThanOrEqual = numericRange.lessThanOrEqual.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "gte": $greaterThanOrEqual,
+                 |          "lte": $lessThanOrEqual
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+            """.stripMargin
 
+          json = json :+ parse(range)
+
+        } else if (numericRange.greaterThan.nonEmpty) {
+          //val name = numericRange.name
+          val greaterThan = numericRange.greaterThan.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "gt": $greaterThan
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+        """.stripMargin
+
+          json = json :+ parse(range)
+
+        } else if (numericRange.greaterThanOrEqual.nonEmpty) {
+          //val name = numericRange.name
+          val greaterThanOrEqual = numericRange.greaterThanOrEqual.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "gte": $greaterThanOrEqual
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+            """.stripMargin
+
+          json = json :+ parse(range)
+
+        } else if (numericRange.lessThan.nonEmpty) {
+          //val name = numericRange.name
+          val lessThan = numericRange.lessThan.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "lt": $lessThan
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+            """.stripMargin
+
+          json = json :+ parse(range)
+
+        } else if (numericRange.lessThanOrEqual.nonEmpty) {
+          //val name = numericRange.name
+          val lessThanOrEqual = numericRange.lessThanOrEqual.get
+          val range =
+            s"""
+                 |{
+                 |  "constant_score": {
+                 |    "filter": {
+                 |      "range": {
+                 |        "$name": {
+                 |          "lte": $lessThanOrEqual
+                 |        }
+                 |      }
+                 |    },
+                 |    "boost": 0
+                 |  }
+                 |}
+              """.stripMargin
+
+          json = json :+ parse(range)
+
+        } else {
+          logger.info(
+            """
+                |Misconfigured range information, your query's numeric Range is incorrect.
+                |Ingoring  range information for this query.""".stripMargin)
+          Seq.empty
+        }
+      }
+    }
+    json
+  }
   def getRankingMapping: Map[String, String] = rankingFieldNames map { fieldName =>
     fieldName -> "float"
   } toMap
