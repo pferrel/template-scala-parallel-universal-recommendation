@@ -1,21 +1,15 @@
-import scalariform.formatter.preferences._
-import com.typesafe.sbt.SbtScalariform
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
-
 name := "template-scala-parallel-universal-recommendation"
 
-version := "0.4.2"
+version := "0.2.3"
 
 organization := "io.prediction"
 
-val mahoutVersion = "0.13.0-SNAPSHOT"
-
-val pioVersion = "0.9.7-aml"
+val mahoutVersion = "0.11.1"
 
 libraryDependencies ++= Seq(
-  "io.prediction"    %% "core" % pioVersion % "provided",
-  "org.apache.spark" %% "spark-core" % "1.4.0" % "provided",
-  "org.apache.spark" %% "spark-mllib" % "1.4.0" % "provided",
+  "org.apache.predictionio"    %% "apache-predictionio-core" % pioVersion.value % "provided",
+  "org.apache.spark" %% "spark-core" % "1.3.0" % "provided",
+  "org.apache.spark" %% "spark-mllib" % "1.3.0" % "provided",
   "org.xerial.snappy" % "snappy-java" % "1.1.1.7",
   // Mahout's Spark libs
   "org.apache.mahout" %% "mahout-math-scala" % mahoutVersion,
@@ -28,21 +22,13 @@ libraryDependencies ++= Seq(
   // other external libs
   "com.thoughtworks.xstream" % "xstream" % "1.4.4"
     exclude("xmlpull", "xmlpull"),
-  "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.1.2"
+  "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.1.0.Beta4"
     exclude("org.apache.spark", "spark-catalyst_2.10")
     exclude("org.apache.spark", "spark-sql_2.10"),
-  "org.json4s" %% "json4s-native" % "3.2.10")
-  .map(_.exclude("org.apache.lucene","lucene-core")).map(_.exclude("org.apache.lucene","lucene-analyzers-common"))
+  "org.json4s" %% "json4s-native" % "3.2.11"
+)
 
 resolvers += Resolver.mavenLocal
-
-SbtScalariform.scalariformSettings
-
-ScalariformKeys.preferences := ScalariformKeys.preferences.value
-  .setPreference(AlignSingleLineCaseStatements, true)
-  .setPreference(DoubleIndentClassDeclaration, true)
-  .setPreference(DanglingCloseParenthesis, Prevent)
-  .setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
 
 assemblyMergeStrategy in assembly := {
   case "plugin.properties" => MergeStrategy.discard
