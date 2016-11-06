@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-package org.template
+package com.uniflash
 
-import io.prediction.controller.LServing
+import org.apache.predictionio.controller.LServing
 
 class Serving
-    extends LServing[Query, PredictedResult] {
+  extends LServing[Query, PredictedResult] {
 
-  override def serve(
-    query: Query,
+  override
+  def serve(query: Query,
     predictedResults: Seq[PredictedResult]): PredictedResult = {
     predictedResults.head
   }
