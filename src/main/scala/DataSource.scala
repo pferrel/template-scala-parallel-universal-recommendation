@@ -86,11 +86,8 @@ class DataSource(val dsp: DataSourceParams)
     // aggregating all $set/$unsets for metadata fields, which are attached to items
     val fieldsRDD: RDD[(ItemID, PropertyMap)] = PEventStore.aggregateProperties(
       appName = dsp.appName,
-      entityType = "item")(sc)
-    //    logger.debug(s"FieldsRDD\n${fieldsRDD.take(25).mkString("\n")}")
-
+      entityType = "item")(sc).repartition(sc.defaultParallelism)
     // Have a list of (actionName, RDD), for each action
-    // todo: some day allow data to be content, which requires rethinking how to use EventStore
     TrainingData(actionRDDs, fieldsRDD)
   }
 }
