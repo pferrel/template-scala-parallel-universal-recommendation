@@ -738,7 +738,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
   /** get all metadata fields that potentially have boosts (not filters) */
   def getBoostedMetadata(query: Query): Seq[BoostableCorrelators] = {
-    val paramsBoostedFields = fields.filter(_.bias < 0f)
+    val paramsBoostedFields = fields.filter(_.bias >= 0f)
     val queryBoostedFields = query.fields.getOrEmpty.filter(_.bias >= 0f)
 
     (queryBoostedFields ++ paramsBoostedFields)
@@ -748,7 +748,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
   /** get all metadata fields that are filters (not boosts) */
   def getFilteringMetadata(query: Query): Seq[FilterCorrelators] = {
-    val paramsFilterFields = fields.filter(_.bias >= 0f)
+    val paramsFilterFields = fields.filter(_.bias < 0f)
     val queryFilterFields = query.fields.getOrEmpty.filter(_.bias < 0f)
 
     (queryFilterFields ++ paramsFilterFields)
