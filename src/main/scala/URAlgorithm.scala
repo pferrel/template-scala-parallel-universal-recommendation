@@ -529,6 +529,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
       // purchase or view, we'll pass both to the query if the user history or items correlators are empty
       // then metadata or backfill must be relied on to return results.
       val numRecs = query.num.getOrElse(limit)
+      val offset = query.offset.getOrElse(0)
       val should = buildQueryShould(query, boostable)
       val must = buildQueryMust(query, boostable)
       val mustNot = buildQueryMustNot(query, events)
@@ -536,6 +537,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
       val json =
         ("size" -> numRecs) ~
+        ("from" -> offset) ~
           ("query" ->
             ("bool" ->
               ("should" -> should) ~
