@@ -368,8 +368,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
   /** Return a list of items recommended for a user identified in the query
    *  The ES json query looks like this:
    *  {
-   *    "size": 20,
-   *    "from": 0,
+   *    "size": 20
    *    "query": {
    *      "bool": {
    *        "should": [
@@ -397,16 +396,14 @@ class URAlgorithm(val ap: URAlgorithmParams)
    *              "category": ["cat1"],
    *              "boost": 0
    *            }
-   *          }
-   *        ],
-   *        "must_not": [ //blacklisted items
+   *          },
+   *         {
+   *        "must_not": [//blacklisted items
    *          {
    *            "ids": {
    *              "values": ["items-id1", "item-id2", ...]
    *            }
-   *          }
-   *        ]
-   *      },
+   *          },
    *         {
    *           "constant_score": {// date in query must fall between the expire and available dates of an item
    *             "filter": {
@@ -532,7 +529,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
       // purchase or view, we'll pass both to the query if the user history or items correlators are empty
       // then metadata or backfill must be relied on to return results.
       val numRecs = query.num.getOrElse(limit)
-      val offset = query.offset.getOrElse(0)
       val should = buildQueryShould(query, boostable)
       val must = buildQueryMust(query, boostable)
       val mustNot = buildQueryMustNot(query, events)
@@ -540,7 +536,6 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
       val json =
         ("size" -> numRecs) ~
-        ("from" -> offset) ~
           ("query" ->
             ("bool" ->
               ("should" -> should) ~
